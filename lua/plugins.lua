@@ -47,6 +47,7 @@ require('lazy').setup({
   { 'numToStr/Comment.nvim', opts = {} },
   -- Highlight todo, notes, etc in comments
   { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+  { 'tpope/vim-obsession' },
 
   -- NOTE: Fat Boys
   --
@@ -178,6 +179,8 @@ require('lazy').setup({
       --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
     end,
   },
+  -- Keep context above
+  { 'nvim-treesitter/nvim-treesitter-context' },
 
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
@@ -185,6 +188,77 @@ require('lazy').setup({
 
   -- nvim tmux compatibility
   { 'christoomey/vim-tmux-navigator', lazy = false },
+
+  -- harpoon2: Fast buffer navigation
+  {
+    'ThePrimeagen/harpoon',
+    branch = 'harpoon2',
+    dependencies = { 'nvim-lua/plenary.nvim', 'nvim-telescope/telescope.nvim' },
+    config = function()
+      local harpoon = require 'harpoon'
+      harpoon:setup {}
+
+      -- basic telescope config
+      local conf = require('telescope.config').values
+      local function toggle_telescope(harpoon_files)
+        local file_paths = {}
+        for _, item in ipairs(harpoon_files.items) do
+          table.insert(file_paths, item.value)
+        end
+
+        require('telescope.pickers')
+          .new({}, {
+            prompt_title = 'Harpoon',
+            finder = require('telescope.finders').new_table {
+              results = file_paths,
+            },
+            previewer = conf.file_previewer {},
+            sorter = conf.generic_sorter {},
+          })
+          :find()
+      end
+
+      vim.keymap.set('n', '<C-e>', function()
+        toggle_telescope(harpoon:list())
+      end, { desc = 'Open harpoon window' })
+
+      -- Harpoon keymaps
+      vim.keymap.set('n', '<leader>a', function()
+        harpoon:list():add()
+      end, { desc = 'Harpoon: Add buffer' })
+
+      vim.keymap.set('n', '<A-j>', function()
+        harpoon:list():select(1)
+      end, { desc = 'Harpoon: Select 1' })
+      vim.keymap.set('n', '<A-k>', function()
+        harpoon:list():select(2)
+      end, { desc = 'Harpoon: Select 2' })
+      vim.keymap.set('n', '<A-l>', function()
+        harpoon:list():select(3)
+      end, { desc = 'Harpoon: Select 3' })
+      vim.keymap.set('n', '<A-ö>', function()
+        harpoon:list():select(4)
+      end, { desc = 'Harpoon: Select 4' })
+
+      -- Toggle previous & next buffers stored within Harpoon list
+      vim.keymap.set('n', '<C-S-P>', function()
+        harpoon:list():prev()
+      end, { desc = 'Harpoon: Toggle prev' })
+      vim.keymap.set('n', '<C-S-N>', function()
+        harpoon:list():next()
+      end, { desc = 'Harpoon: Toggle next' })
+    end,
+  },
+
+  -- Shows vim undotree to you, more advanced file jumping
+  {
+    'mbbill/undotree',
+    lazy = false,
+    config = function()
+      -- key maps
+      vim.keymap.set('n', '<A-u>', vim.cmd.UndotreeToggle, { desc = 'UndoTree: Toggle' })
+    end,
+  },
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.
