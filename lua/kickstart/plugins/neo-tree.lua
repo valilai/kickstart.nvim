@@ -11,8 +11,17 @@ return {
   },
   cmd = 'Neotree',
   keys = {
-    { '\\', ':Neotree reveal<CR>', { desc = 'NeoTree reveal' } },
+    { '\\', ':Neotree toggle<CR>', { desc = 'NeoTree toggle' } },
   },
+  config = function()
+    require('neo-tree').setup {
+      close_if_last_window = false,
+      popup_border_style = 'rounded',
+      enable_git_status = true,
+      enable_diagnostics = true,
+      use_libuv_file_watcher = true,
+    }
+  end,
   opts = {
     filesystem = {
       window = {

@@ -6,9 +6,24 @@ return {
     config = function()
       local lint = require 'lint'
       lint.linters_by_ft = {
-        markdown = { 'markdownlint' },
+        markdown = { 'vale' },
         c = { 'cppcheck' },
-        cpp = { 'cppcheck' },
+        cpp = { 'cppcheck_cpp' },
+      }
+
+      -- C++ configuration
+      lint.linters.cppcheck_cpp = {
+        cmd = 'cppcheck',
+        stdin = true,
+        args = {
+          '--eanble=all',
+          '--inline-suppr',
+          '--quiet',
+          '--language=c++',
+          '--suppress=missingIncludeSystem',
+        },
+        stream = 'stderr',
+        ignore_exitcode = true,
       }
 
       -- To allow other plugins to add linters to require('lint').linters_by_ft,

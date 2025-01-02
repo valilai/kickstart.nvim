@@ -46,8 +46,9 @@ require('lazy').setup({
   -- "gc" to comment visual regions/lines
   { 'numToStr/Comment.nvim', opts = {} },
   -- Highlight todo, notes, etc in comments
-  { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = false } },
+  { 'folke/todo-comments.nvim', event = 'VimEnter', dependencies = { 'nvim-lua/plenary.nvim' }, opts = { signs = true } },
   { 'tpope/vim-obsession' },
+  ----  { 'mg979/vim-visual-multi' },
 
   -- NOTE: Fat Boys
   --
@@ -58,19 +59,21 @@ require('lazy').setup({
       {
         '<leader>f',
         function()
-          require('conform').format { async = true, lsp_fallback = true }
+          local conform = require 'conform'
+          conform.format { async = true, lsp_fallback = true }
+          -- print(vim.inspect(conform.opts.formatters))
         end,
         mode = '',
         desc = '[F]ormat buffer',
       },
     },
     opts = {
-      notify_on_error = false,
+      notify_on_error = true,
       format_on_save = function(bufnr)
         -- Disable "format_on_save lsp_fallback" for languages that don't
         -- have a well standardized coding style. You can add additional
         -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
+        local disable_filetypes = { c = false, cpp = true }
         return {
           timeout_ms = 500,
           lsp_fallback = not disable_filetypes[vim.bo[bufnr].filetype],
@@ -151,7 +154,7 @@ require('lazy').setup({
     'nvim-treesitter/nvim-treesitter',
     build = ':TSUpdate',
     opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc' },
+      ensure_installed = { 'bash', 'c', 'cpp', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc', 'doxygen' },
       -- Autoinstall languages that are not installed
       auto_install = true,
       highlight = {
@@ -214,6 +217,17 @@ require('lazy').setup({
             },
             previewer = conf.file_previewer {},
             sorter = conf.generic_sorter {},
+            attach_mappings = function(prompt_buffer_number, map)
+              map('i', '<C-d>', function()
+                local state = require 'telescope.actions.state'
+                local selected_entry = state.get_selected_entry()
+                local current_picker = state.get_current_picker(prompt_buffer_number)
+
+                harpoon:list():remove_at(selected_entry.index)
+                -- current_picker:refresh(make_fider())
+              end)
+              return true
+            end,
           })
           :find()
       end
@@ -225,28 +239,28 @@ require('lazy').setup({
       -- Harpoon keymaps
       vim.keymap.set('n', '<leader>a', function()
         harpoon:list():add()
-      end, { desc = 'Harpoon: Add buffer' })
+      end, { desc = '[Harpoon] Add buffer' })
 
-      vim.keymap.set('n', '<A-j>', function()
+      vim.keymap.set('n', '<leader>j', function()
         harpoon:list():select(1)
-      end, { desc = 'Harpoon: Select 1' })
-      vim.keymap.set('n', '<A-k>', function()
+      end, { desc = '[Harpoon] Select 1' })
+      vim.keymap.set('n', '<leader>k', function()
         harpoon:list():select(2)
-      end, { desc = 'Harpoon: Select 2' })
-      vim.keymap.set('n', '<A-l>', function()
+      end, { desc = '[Harpoon] Select 2' })
+      vim.keymap.set('n', '<leader>l', function()
         harpoon:list():select(3)
-      end, { desc = 'Harpoon: Select 3' })
-      vim.keymap.set('n', '<A-ö>', function()
+      end, { desc = '[Harpoon] Select 3' })
+      vim.keymap.set('n', '<leader>ö', function()
         harpoon:list():select(4)
-      end, { desc = 'Harpoon: Select 4' })
+      end, { desc = '[Harpoon] Select 4' })
 
       -- Toggle previous & next buffers stored within Harpoon list
       vim.keymap.set('n', '<C-S-P>', function()
         harpoon:list():prev()
-      end, { desc = 'Harpoon: Toggle prev' })
+      end, { desc = '[Harpoon] Toggle prev' })
       vim.keymap.set('n', '<C-S-N>', function()
         harpoon:list():next()
-      end, { desc = 'Harpoon: Toggle next' })
+      end, { desc = '[Harpoon] Toggle next' })
     end,
   },
 
@@ -258,6 +272,54 @@ require('lazy').setup({
       -- key maps
       vim.keymap.set('n', '<A-u>', vim.cmd.UndotreeToggle, { desc = 'UndoTree: Toggle' })
     end,
+  },
+
+  -- [[
+  -- INFO: All plugins for Jupyter-Notebooks in nvim
+  --
+  -- ]]
+  -- LSP in markdown
+  {
+    'quarto-dev/quarto-nvim',
+    dependencies = {
+      'jmbuhr/otter.nvim',
+      'nvim-treesitter/nvim-treesitter',
+    },
+  },
+  {
+    '3rd/image.nvim',
+    config = function()
+      require('image').setup {
+        backend = 'kitty',
+        integrations = {}, -- do whatever you want with image.nvim's integrations
+        max_width = 100, -- tweak to preference
+        max_height = 12, -- ^
+        max_height_window_percentage = math.huge, -- this is necessary for a good experience
+        max_width_window_percentage = math.huge,
+        window_overlap_clear_enabled = true,
+        window_overlap_clear_ft_ignore = { 'cmp_menu', 'cmp_docs', '' },
+        tmux_show_only_in_active_window = true,
+      }
+    end,
+  },
+  {
+    'benlubas/molten-nvim',
+    version = '^1.0.0', -- use version <2.0.0 to avoid breaking changes
+    dependencies = { '3rd/image.nvim' },
+    build = ':UpdateRemotePlugins',
+    init = function()
+      -- these are examples, not defaults. Please see the readme
+      vim.g.molten_image_provider = 'image.nvim'
+      vim.g.molten_wrap_output = true
+      vim.g.molten_virt_text_output = true
+      vim.g.molten_virt_lines_off_by_1 = true
+      vim.g.molten_output_win_max_height = 20
+      vim.g.molten_cover_empty_lines = true
+    end,
+  },
+  {
+    'danymat/neogen',
+    config = true,
   },
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`

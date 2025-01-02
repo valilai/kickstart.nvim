@@ -45,3 +45,17 @@ vim.keymap.set('i', '<C-j>', '<Down>', { desc = 'Move down in insert' })
 vim.keymap.set('i', '<C-k>', '<Up>', { desc = 'Move up in insert' })
 vim.keymap.set('i', '<C-e>', '<End>', { desc = 'Move up in insert' })
 vim.keymap.set('i', '<C-i>', '<Esc>^i', { desc = 'Move up in insert' })
+
+-- Molten-nvim
+vim.keymap.set('n', '<localleader>mi', ':MoltenInit<CR>', { silent = true, desc = '[Molten] Initialize the plugin' })
+vim.keymap.set('n', '<localleader>me', ':MoltenEvaluateOperator<CR>', { silent = true, desc = '[Molten] run operator selection' })
+vim.keymap.set('n', '<localleader>mrl', ':MoltenEvaluateLine<CR>', { silent = true, desc = '[Molten] evaluate line' })
+vim.keymap.set('n', '<localleader>mrr', ':MoltenReevaluateCell<CR>', { silent = true, desc = '[Molten] re-evaluate cell' })
+vim.keymap.set('v', '<localleader>mr', ':<C-u>MoltenEvaluateVisual<CR>gv', { silent = true, desc = '[Molten] evaluate visual selection' })
+vim.keymap.set('n', '<localleader>mrd', ':MoltenDelete<CR>', { silent = true, desc = '[Molten] delete cell' })
+vim.keymap.set('n', '<localleader>moh', ':MoltenHideOutput<CR>', { silent = true, desc = '[Molten] hide output' })
+vim.keymap.set('n', '<localleader>mos', ':noautocmd MoltenEnterOutput<CR>', { silent = true, desc = '[Molten] show/enter output' })
+
+-- Harpoon keymaps: lua/plugins.lua
+-- Neogen
+vim.keymap.set('n', '<leader>nf', ":lua require('neogen').generate()<CR>", { desc = '[Neogen] Generate annotation' })
